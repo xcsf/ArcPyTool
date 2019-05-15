@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Query a SceneLayer's linked FeatureLayer - 4.7</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="http://172.18.230.81:88/4.8/esri/css/main.css">
+  <script src="http://172.18.230.81:88/4.8/init.js"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/SceneLayer",
+      "esri/layers/FeatureLayer",
+      "esri/tasks/support/Query",
+      "esri/tasks/Geoprocessor",
+      "dojo/domReady!"
+    ], function (Map, SceneView, SceneLayer, FeatureLayer, Query, Geoprocessor) {
+
+      // Create Map
+      var map = new Map({
+        basemap: "Topographic",
+        //ground: "world-elevation"
+      });
+
+      // Create the SceneView
+      var view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: {
+            x: 12718107.42,
+            y: 2582462.66,
+            z: 16.503,
+            spatialReference: 102100
+          },
+          heading: 32.5,
+          tilt: 64.9
+        }
+      });
+
+      // Create SceneLayer and add to the map
+      var sceneLayer = new SceneLayer({
+        url: "https://webgis.szmedi.com.cn/server/rest/services/Hosted/pipe3d/SceneServer",
+        // disable "default" scenelayer popups
+        // because we will show them manually
+        popupEnabled: false,
+        // definitionExpression: "id IN('3J1003-1_3J1004','3J1074_3J6000')"
+      });
+      map.add(sceneLayer);
+      // Create the linked FeatureLayer instance that contains the attributes.
+      // This layer must also contain a field with the SceneLayer
+      // features' objectid, since we will use it for linking both layers
+
+      var featureLayer = new FeatureLayer({
+        url: "https://webgis.szmedi.com.cn/server/rest/services/pipe3d/FeatureServer/0",
+        // configure the feature layer to return all fields
+        outFields: ["*"],
+        // define the popup template with the fields from FeatureLayer
+        popupTemplate: { // autocasts as new PopupTemplate()
+          title: "NYC building: {objectid}",
+          content: [{
+            type: "fields"
+          }],
+          fieldInfos: [{
+            fieldName: "mode",
+            visible: true,
+            label: "mode"
+          }, {
+            fieldName: "material",
+            label: "material",
+            visible: true,
+            format: {
+              places: 0,
+              digitSeparator: true
+            }
+          }]
+        }
+      });
+
+      // we don't need to add the FeatureLayer to the map, as
+      // it won't be displayed and we won't click on its features,
+      // however in this case we need to explicitly load the layer
+      // before we execute any queries
+
+      featureLayer.load().then(attributesReady);
+
+      function attributesReady() {
+
+        // capture click events on the view
+        view.on("click", function (event) {
+
+          // get the returned screen x, y coordinates and use it
+          // with hitTest to find if any graphics were clicked
+          // (using promise chaining for cleaner code and error handling)
+          view.hitTest(event).then(function (response) {
+
+            // we're only interested in the first result
+            var result = response.results[0];
+            if (result && result.graphic) {
+              return result.graphic;
+            }
+          }).then(function (graphic) {
+
+            // now extract the object id from the graphic
+            var objectid = graphic.attributes.OBJECTID_1;
+            console.log(featureLayer);
+            var query = new Query();
+
+            // the feature layer must contain a field with the
+            // objectid values of the scenelayer buildings in
+            // order to execute this query correctly
+            query.where = "objectid_1 = " + objectid;
+            query.returnGeometry = false;
+            query.outFields = ["objectid", "mode", "material"];
+
+            // execute the query
+            return featureLayer.queryFeatures(query);
+
+          }).then(function (results) {
+
+            // process the feature service query results
+            if (results && results.features.length > 0) {
+
+              // show the popup with all attributes coming from the
+              // feature layer query, at the original click position
+              view.popup.open({
+                features: results.features,
+                location: event.mapPoint
+              });
+            }
+          }).catch(function (err) {
+            console.error(err);
+          });
+        });
+      }
+      var gptool = new Geoprocessor({
+        url: "https://webgis.szmedi.com.cn/server/rest/services/3dquery/GPServer/3dquery",
+      });
+      params = {
+        x: '12718107.42',
+        y: '2582462.66',
+        z: '16.503',
+        h: '10',
+        r: '1',
+        SDEWorkSpace: '\\\\172.18.230.81\\arcgissharedata\\szgistest.sde',
+        LogPathName: '\\\\172.18.230.81\\arcgissharedata\\3dquery.log',
+        PointsFilePath: '\\\\172.18.230.81\\arcgissharedata\\pointinfo.txt',
+        PipeFeature: 'szgis_test.sde.pipe3d'
+      };
+      console.log(sceneLayer);
+      gptool.submitJob(params).then(response => {
+        gptool.getResultData(response.jobId, 'result').then(result => {
+          // console.log(result.value.replace(',','\',\''))
+          sceneLayer.definitionExpression ="id IN(\'"+ result.value.replace(',','\',\'') +"\')";
+        });
+      }, error => {
+        console.log(error);
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>
