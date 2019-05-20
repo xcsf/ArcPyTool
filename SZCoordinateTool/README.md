@@ -21,3 +21,6 @@ C:\Users\Mr_Yin\AppData\Roaming\Esri\ArcGISPro\ArcToolbox\CustomTransformations
 ### 7. 新加支持栅格数据集转换工具。
 
 ## 8. 不能修改文件目录结构，54114tonewsz.txt、newszto54114.txt、static.gdb
+
+### 9.较表格中的深圳独立坐标  新的深圳独立坐标	小坐标X(南/北)-40m，大坐标Y(东/西)+34m
+
