@@ -24,8 +24,11 @@ dictionary = {
     '中等风化花岗岩': 'ModeratelyWeatheredGranite',
     '中等风化黑云母花岗岩': 'MediumWeatheringBiotiteGranite',
     '中等风化含砾砂岩': 'MediumWeatheringConglomeraticSandstone',
+    '中风化砂岩': 'MediumWeatheringSandstone',
     '中等风化断层角砾岩': 'MediumWeatheringFaultBreccia',
     '中粗砂': 'MidCoarseSand',
+    '全风化砂岩': 'Weathered Sandstone',
+    '强风化砂岩': 'StrongWeatheredSandstone',
     '杂填土': 'MiscellaneousFill',
     '圆砾': 'RoundGravel',
     '淤泥质土': 'SiltSoil',
@@ -102,6 +105,7 @@ dictionary = {
     '全风化碎裂岩': 'WeatheredBrokenRock',
     '全风化泥岩与砂岩互层': 'WeatheredMudstoneAndSandstoneInterbed',
     '全风化角岩': 'WeatheredHornfels',
+    '全风化页岩': 'WeatheredShale',
     '全风化混合岩': 'WeatheredMigmatite',
     '全风化混合花岗岩': 'WeatheredMixedGranite',
     '全风化花岗岩': 'FullyWeatheredGranite',
@@ -111,6 +115,7 @@ dictionary = {
     '全风化断层角砾岩、断层泥': 'WeatheredFaultBrecciaAndFaultGouge',
     '全风化变质粉砂岩': 'WeatheredMetamorphicSiltstone',
     '全风黑云母化花岗岩': 'WindBiotiteGranite',
+    '全风化炭质页岩': 'WeatheredCarbonaceousShale',
     '强风化炭质页岩夹砂岩（块状）': 'StrongWeatheringCarbonaceousShaleClipSandstone(Block)',
     '强风化炭质页岩夹砂岩': 'StrongWeatheredSandstoneCarbonaceousShale',
     '强风化炭质页岩': 'StrongWeatheringCarbonaceousShale',
@@ -135,6 +140,7 @@ dictionary = {
     '强风化黑云母花岗岩(半岩半土状)': 'StrongWeatheringBiotiteGranite',
     '强风化黑云母花岗岩': 'StrongWeatheringBiotiteGranite',
     '强风化断层角砾岩': 'StrongWeatheringFaultBreccia',
+    '强风化页岩': 'StrongWeatheringFaultShale',
     '凝灰质石英岩(土状)': 'TuffaceousQuartzite',
     '凝灰质石英岩(块状)': 'TuffaceousQuartzite',
     '凝灰质石英岩': 'TuffaceousQuartzite',
@@ -149,6 +155,7 @@ dictionary = {
     '卵石': 'Pebble',
     '砾质黏性土': 'GravellyClayeySoils',
     '砾砂': 'GravelSand',
+    '粗砾砂': 'Coarse Gravel Sand',
     '块状强风化碎裂岩': 'MassiveStrongWeatheringCataclasticRock',
     '块状强风化角岩': 'MassiveStrongWeatheringHornfels',
     '块状强风化混合岩': 'MassiveStrongWeatheringMigmatite',
@@ -184,7 +191,27 @@ dictionary = {
     '半岩半土状强风化混合花岗岩': 'RockAndSoilStrongWeatheringMixedGranite',
     '半岩半土状强风化黑云母花岗岩': 'RockAndSoilStrongWeatheringBiotiteGranite',
     '半岩半土状黑云母花岗岩': 'RockAndSoilBiotiteGranite',
-
+    '粉质黏土素填土': 'Silty Clay Grain Filling',
+    '含砾粉质黏土': 'Conglomeratic Silty Clay',
+    '石灰岩': 'Limestone',
+    '泥炭': 'Peat',
+    '砂土素填土': 'Sand GrainFilling',
+    '含泥炭质粉质黏土': 'PeatySiltyClay',
+    '土洞': 'Soil Hole',
+    '含卵石粉质黏土': 'PebblySiltyClay',
+    '角砾': 'Breccia',
+    '页岩': 'Shale',
+    '含粉质黏土碎石': 'ContainingSiltyClayGravel',
+    '碎石': 'Gravel',
+    '微风化灰岩': 'Breeze, Limestone',
+    '溶洞充填物（砾砂）': 'KarstCaveFillings(Grit)',
+    '溶洞充填物（砂砾）': 'KarstCaveFillings(Gravel)',
+    '溶洞充填物（粉质黏土）': 'KarstCaveFillings(Silty Clay)',
+    '溶洞充填物（角砾）': 'KarstCaveFillings(Breccia)',
+    '溶洞（空洞）': 'Cave(Hole)',
+    '溶蚀灰岩': 'KarstLimestone',
+    '空洞': 'Hole',
+    '含碎石粉质黏土': 'ContainingGravelSiltyClay'
 }
 
 for num, filename in enumerate(os.listdir('E:\ArcPyscript\geobodyPY\sourcetable')):
@@ -203,7 +230,10 @@ for num, filename in enumerate(os.listdir('E:\ArcPyscript\geobodyPY\sourcetable'
     indexX = line[0].index('坐标XN')
     indexY = line[0].index('坐标YE')
     # indexLevel = line[0].index('层号')
-    indexCharacter = line[0].index('岩土特征')
+    try:
+        indexCharacter = line[0].index('岩土特征')
+    except:
+        indexCharacter = 13
     indexName = line[0].index('岩土名称')
     indexDrill = line[0].index('孔号')
     indexTop = line[0].index('层顶标高')
@@ -223,6 +253,7 @@ for num, filename in enumerate(os.listdir('E:\ArcPyscript\geobodyPY\sourcetable'
             line[indexRow][indexCharacter] = str(line[indexRow][indexCharacter]).replace(r",", r"，").replace('\n', '')
             line[indexRow][indexName] = str(line[indexRow][indexName]).replace(r",", r"").replace('\n', '')
             curName = line[indexRow][indexName].replace('\n', '')
+            print('curName', indexName, indexRow, curName)
             curNameAndCharacter = curName + line[indexRow][indexCharacter]
             # 深圳独立XY与 ArcMap 中xy相反 这里交换
             if float(line[indexRow][indexY]) > float(line[indexRow][indexX]):
