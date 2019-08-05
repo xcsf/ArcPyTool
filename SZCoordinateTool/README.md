@@ -20,7 +20,6 @@ C:\Users\Mr_Yin\AppData\Roaming\Esri\ArcGISPro\ArcToolbox\CustomTransformations
 
 ## 8. 不能修改文件目录结构，54114tonewsz.txt、newszto54114.txt、static.gdb
 
-### 9.较表格中的深圳独立坐标  新的深圳独立坐标	小坐标X(南/北)-40m，大坐标Y(东/西)+34m
+### 9.较表格中的深圳独立坐标  54114tonewsz.txt、newszto54114.txt、中已经为最新正确深圳独立控制点static.gdb还未更新，待有业务需求后更新
 
 ### 10.新加批量处理脚本  不过没完善 。。
-
